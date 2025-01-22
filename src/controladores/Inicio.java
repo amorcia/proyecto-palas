@@ -1,0 +1,33 @@
+package controladores;                                                                                                                                                                            
+                                                                                                                                                                                                  
+ import javax.swing.SwingUtilities;                                                                                                                                                               
+ import servicios.OperativaImplementacion;                                                                                                                                                        
+                                                                                                                                                                                                  
+ /**                                                                                                                                                                                              
+  * Clase que representa el punto de entrada de la aplicación.                                                                                                                                    
+  *                                                                                                                                                                                               
+  * @author amorcia                                                                                                                                                                               
+  * @version 1.0                                                                                                                                                                                  
+  * @since 22/01/2025                                                                                                                                                                             
+  */                                                                                                                                                                                              
+ public class Inicio {                                                                                                                                                                            
+                                                                                                                                                                                                  
+     /**                                                                                                                                                                                          
+      * Método principal que inicia la aplicación.                                                                                                                                                
+      *                                                                                                                                                                                           
+      * @param args Argumentos de línea de comandos.                                                                                                                                              
+      * @author amorcia                                                                                                                                                                           
+      * @version 1.0                                                                                                                                                                              
+      * @since 22/01/2025                                                                                                                                                                         
+      */                                                                                                                                                                                          
+     public static void main(String[] args) {                                                                                                                                                     
+         // Ejecuta el código en el hilo de despacho de eventos de Swing                                                                                                                          
+         SwingUtilities.invokeLater(() -> {                                                                                                                                                       
+             // Crea una instancia de OperativaImplementacion                                                                                                                                     
+             OperativaImplementacion juego = new OperativaImplementacion();                                                                                                                       
+             // Hace visible la interfaz del juego                                                                                                                                                
+             juego.setVisible(true);                                                                                                                                                              
+         });                                                                                                                                                                                      
+     }                                                                                                                                                                                            
+ }                                                                                                                                                                                                
+                                                                                                                                                                                                  
