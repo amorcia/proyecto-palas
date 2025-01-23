@@ -82,10 +82,10 @@ public class OperativaImplementacion extends JFrame implements OperativaInterfaz
     @Override
     public void mostrarDialogo(int nivel, int puntuacion, int tiempoPasado) {
         // Verifica si se han alcanzado los objetivos de puntuación
-        if (nivel == 1 && panelJuego.obtenerLadrillosRotos() == 30) {
+        if (nivel == 1 && panelJuego.getContadorLadrillosRotos() >= 30) {
             JOptionPane.showMessageDialog(this, "¡Felicidades! Has roto los 30 ladrillos en el nivel 1.");
             gameOver();
-        } else if (nivel == 2 && panelJuego.obtenerLadrillosRotos() == 50) {
+        } else if (nivel == 2 && panelJuego.getContadorLadrillosRotos() >= 50) {
             JOptionPane.showMessageDialog(this, "¡Felicidades! Has roto los 50 ladrillos en el nivel 2.");
             gameOver();
         }
@@ -179,6 +179,10 @@ public class OperativaImplementacion extends JFrame implements OperativaInterfaz
         private JButton botonVolverAtras; // Botón para volver al menú
         private boolean isGameOver = false; // Bandera que indica si el juego ha terminado
 
+        // Contadores de ladrillos
+        private int contadorLadrillosRotos = 0; // Contador de ladrillos rotos
+        private final int maximoLadrillosRotos = 100; // Máximo de ladrillos rotos
+
         /**
          * Constructor que inicializa el panel del juego.
          * 
@@ -224,11 +228,12 @@ public class OperativaImplementacion extends JFrame implements OperativaInterfaz
             this.ladrillos = new ArrayList<>();
             this.ladrillosRotos = new ArrayList<>();
             this.segundos = 0;
+            this.contadorLadrillosRotos = 0; // Reiniciar contador de ladrillos rotos
 
             pala = new PalaDto(getWidth() / 2 - ANCHO_PALA / 2, getHeight() - ALTO_PALA - 30, ANCHO_PALA, ALTO_PALA);
             pala2 = new PalaDto(getWidth() / 2 - ANCHO_PALA / 2, 50, ANCHO_PALA, ALTO_PALA); // Pala superior en modo medio
 
-            int velocidadPelota = (level == 1) ? 1 : 3; // Velocidad de la pelota según el nivel
+            int velocidadPelota = (level == 1) ? 2 : 4; // Velocidad de la pelota según el nivel
             pelota = new PelotaDto(getWidth() / 2, 400, VOLUMEN_PELOTA, velocidadPelota, -velocidadPelota);
 
             generarLadrillos(); // Generación de ladrillos
@@ -248,6 +253,7 @@ public class OperativaImplementacion extends JFrame implements OperativaInterfaz
             puntuacion = 0;
             vidas = (nivel == 0) ? 0 : 3; // Reinicia vidas según el nivel
             segundos = 0;
+            contadorLadrillosRotos = 0; // Reiniciar contador de ladrillos rotos
             reiniciarTemporizador();
             repaint(); // Redibuja el panel
         }
@@ -324,30 +330,30 @@ public class OperativaImplementacion extends JFrame implements OperativaInterfaz
          * @param contador Número de ladrillos a regenerar.
          * @date 22/01/2025 - amorcia
          */
-        private void regenerarLadrillos(int contador) {
-            for (int i = 0; i < contador; i++) {
-                regenerarLadrillo(); // Regenerar ladrillo
+        private void regenerarLadrillo() {
+            if (ladrillosRotos.isEmpty()) {
+                return; // Si no hay ladrillos destruidos, sale del método
             }
+            int randomIndex = (int) (Math.random() * ladrillosRotos.size()); // Selecciona un ladrillo destruido aleatoriamente
+            Rectangle2D ladrilloDestruido = ladrillosRotos.get(randomIndex); // Obtiene el ladrillo destruido
+            ladrillos.add(new Rectangle2D.Double(ladrilloDestruido.getX(), ladrilloDestruido.getY(), ladrilloDestruido.getWidth(), ladrilloDestruido.getHeight())); // Regenera el ladrillo
+            ladrillosRotos.remove(randomIndex); // Elimina el ladrillo de la lista de destruidos
         }
 
         /**
-         * Regenera un ladrillo roto y lo añade al juego.
+         * Método para regenerar múltiples ladrillos.
          * 
+         * @param cuenta Cantidad de ladrillos a regenerar.
          * @date 22/01/2025 - amorcia
          */
-        private void regenerarLadrillo() {
-            if (ladrillosRotos.isEmpty()) {
-                return; // No hay ladrillos rotos para regenerar
+        private void regenerarLadrillos(int cuenta) {
+            for (int i = 0; i < cuenta; i++) { // Regenera un ladrillo si no se ha alcanzado el máximo permitido
+                if (nivel == 1 && contadorLadrillosRotos < 30) {
+                    regenerarLadrillo();
+                } else if (nivel == 2 && contadorLadrillosRotos < 45) {
+                    regenerarLadrillo();
+                }
             }
-            int limiteLadrillos = (nivel == 1) ? 30 : (nivel == 2) ? 50 : Integer.MAX_VALUE; // Límite de ladrillos
-            if (ladrillos.size() >= limiteLadrillos) {
-                return; // No se puede regenerar más ladrillos
-            }
-
-            int randomIndex = (int) (Math.random() * ladrillosRotos.size()); // Selecciona un ladrillo roto al azar
-            Rectangle2D ladrilloDestruido = ladrillosRotos.get(randomIndex); // Obtiene el ladrillo roto
-            ladrillos.add(new Rectangle2D.Double(ladrilloDestruido.getX(), ladrilloDestruido.getY(), 110, 20)); // Añadir ladrillo regenerado
-            ladrillosRotos.remove(randomIndex); // Elimina el ladrillo roto de la lista
         }
 
         /**
@@ -389,6 +395,16 @@ public class OperativaImplementacion extends JFrame implements OperativaInterfaz
          */
         public int obtenerTiempoTranscurrido() {
             return segundos; // Devuelve el tiempo transcurrido
+        }
+
+        /**
+         * Obtiene la cantidad de ladrillos rotos.
+         * 
+         * @return Número de ladrillos rotos.
+         * @date 22/01/2025 - amorcia
+         */
+        public int getContadorLadrillosRotos() {
+            return contadorLadrillosRotos; // Devuelve el número de ladrillos rotos
         }
 
         @Override
@@ -486,6 +502,8 @@ public class OperativaImplementacion extends JFrame implements OperativaInterfaz
                 if (ladrillo.intersects(pelota.getPosicion().getX(), pelota.getPosicion().getY(), VOLUMEN_PELOTA, VOLUMEN_PELOTA)) {
                     ladrillos.remove(i); // Elimina el ladrillo golpeado
                     ladrillosRotos.add(ladrillo); // Añade a la lista de ladrillos rotos
+                    contadorLadrillosRotos++; // Incrementar el contador de ladrillos rotos
+                    System.out.println("Ladrillos Rotos: " + contadorLadrillosRotos);
                     pelota.rebotarVertical(); // Rebote vertical
                     puntuacion += 10; // Aumenta puntuación
 
@@ -500,25 +518,16 @@ public class OperativaImplementacion extends JFrame implements OperativaInterfaz
         }
 
         /**
-         * Obtiene la cantidad de ladrillos rotos.
-         * 
-         * @return Número de ladrillos rotos.
-         * @date 22/01/2025 - amorcia
-         */
-        private int obtenerLadrillosRotos() {
-            return ladrillosRotos.size(); // Devuelve el número de ladrillos rotos
-        }
-
-        /**
          * Reinicia la pelota a su posición inicial.
          * 
          * @date 22/01/2025 - amorcia
          */
         private void reiniciarPelota() {
-            pelota = new PelotaDto(getWidth() / 2, 400, VOLUMEN_PELOTA, (nivel == 1) ? 1 : 3, -((nivel == 1) ? 1 : 3)); // Reinicia la pelota
+            pelota = new PelotaDto(getWidth() / 2, 400, VOLUMEN_PELOTA, (nivel == 1) ? 2 : 4, -((nivel == 1) ? 2 : 4)); // Reinicia la pelota
         }
     }
 }
+
 
 
 
