@@ -503,7 +503,6 @@ public class OperativaImplementacion extends JFrame implements OperativaInterfaz
                     ladrillos.remove(i); // Elimina el ladrillo golpeado
                     ladrillosRotos.add(ladrillo); // Añade a la lista de ladrillos rotos
                     contadorLadrillosRotos++; // Incrementar el contador de ladrillos rotos
-                    System.out.println("Ladrillos Rotos: " + contadorLadrillosRotos);
                     pelota.rebotarVertical(); // Rebote vertical
                     puntuacion += 10; // Aumenta puntuación
 
